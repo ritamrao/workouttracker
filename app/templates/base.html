@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gym Tracker{% endblock %}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        nav {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 16px;
+        }
+
+        nav a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        nav a:hover {
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #fff;
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: #ddd;
+        }
+
+        h3 {
+            font-size: 15px;
+            font-weight: 500;
+            color: #ccc;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        .btn-primary {
+            background: #4f8ef7;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #2a2a2a;
+            color: #ccc;
+        }
+
+        .btn-success {
+            background: #3a7d44;
+            color: #fff;
+        }
+
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .flash {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .flash.success {
+            background: #1a3a22;
+            border: 1px solid #3a7d44;
+            color: #6fcf97;
+        }
+
+        .flash.error {
+            background: #3a1a1a;
+            border: 1px solid #7d3a3a;
+            color: #eb5757;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid #2a2a2a;
+            color: #888;
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #1f1f1f;
+            color: #ccc;
+        }
+
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #e0e0e0;
+            padding: 6px 10px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #4f8ef7;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            background: #2a2a2a;
+            color: #888;
+            margin-left: 8px;
+        }
+
+        .tag.superset {
+            background: #1a2a3a;
+            color: #4f8ef7;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('main.index') }}">🏋️ Gym Tracker</a>
+        <a href="{{ url_for('main.history_home') }}">History</a>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>

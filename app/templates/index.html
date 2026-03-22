@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Select Day — Gym Tracker{% endblock %}
+
+{% block content %}
+<h1>What day are you training?</h1>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+    {% for day in days %}
+    <a href="{{ url_for('main.log', day_id=day.id) }}" style="text-decoration: none;">
+        <div class="card" style="cursor: pointer; transition: border-color 0.2s;"
+             onmouseover="this.style.borderColor='#4f8ef7'"
+             onmouseout="this.style.borderColor='#2a2a2a'">
+            <div style="font-size: 36px; font-weight: 700; color: #4f8ef7; margin-bottom: 8px;">
+                {{ day.name }}
+            </div>
+            <div style="font-size: 16px; color: #ddd; margin-bottom: 4px;">{{ day.label }}</div>
+            <div style="font-size: 13px; color: #666;">{{ day.week_day }}</div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

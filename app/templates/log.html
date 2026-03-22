@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Log Session — {{ day.label }}{% endblock %}
+
+{% block content %}
+<h1>{{ day.name }} — {{ day.label }}</h1>
+
+<form action="{{ url_for('main.log_submit', day_id=day.id) }}" method="POST">
+
+    <!-- Date + Notes -->
+    <div class="card">
+        <h3>Session Details</h3>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px; align-items: start;">
+            <div>
+                <label style="font-size: 12px; color: #888; display: block; margin-bottom: 6px;">DATE</label>
+                <input type="date" name="date" value="{{ today }}">
+            </div>
+            <div>
+                <label style="font-size: 12px; color: #888; display: block; margin-bottom: 6px;">NOTES</label>
+                <textarea name="notes" placeholder="How did it feel? Any PRs?"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exercises -->
+    {% set ns = namespace(current_superset='') %}
+    {% for exercise in exercises %}
+
+        {% if exercise.is_superset and exercise.superset_group != ns.current_superset %}
+            {% set ns.current_superset = exercise.superset_group %}
+            <div style="font-size: 11px; color: #4f8ef7; text-transform: uppercase;
+                        letter-spacing: 1px; margin: 20px 0 8px; padding-left: 4px;">
+                ⚡ Superset {{ exercise.superset_group }}
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">{{ exercise.name }}</h3>
+                {% if exercise.is_superset %}
+                    <span class="tag superset">Superset {{ exercise.superset_group }}</span>
+                {% endif %}
+                <span class="tag" style="margin-left: auto;">{{ exercise.reps }} reps</span>
+            </div>
+
+            <!-- Last session reference -->
+            {% if exercise.id in last_weights %}
+                <div style="background: #111; border-radius: 6px; padding: 10px 14px;
+                            margin-bottom: 16px; font-size: 13px; color: #666;">
+                    <span style="color: #555; font-size: 11px; text-transform: uppercase;
+                                 letter-spacing: 0.5px;">Last session → </span>
+                    {% for s in last_weights[exercise.id] %}
+                        <span style="color: #888;">
+                            Set {{ s.set }}: <strong style="color: #aaa;">{{ s.weight }}kg × {{ s.reps }}</strong>
+                            {% if s.sub %}<span style="color: #555;">({{ s.sub }})</span>{% endif %}
+                        </span>
+                        {% if not loop.last %} &nbsp;|&nbsp; {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="font-size: 12px; color: #444; margin-bottom: 16px;">No previous data</div>
+            {% endif %}
+
+            <!-- Set inputs -->
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Set</th>
+                        <th>Weight (kg)</th>
+                        <th>Reps</th>
+                        <th>Substitution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for set_num in range(1, exercise.working_sets + 1) %}
+                    <tr>
+                        <td style="color: #555; font-weight: 600;">{{ set_num }}</td>
+                        <td style="width: 140px;">
+                            <input type="number"
+                                   name="weight_{{ exercise.id }}_set{{ set_num }}"
+                                   placeholder="kg"
+                                   step="0.5"
+                                   min="0">
+                        </td>
+                        <td style="width: 100px;">
+                            <input type="number"
+                                   name="reps_{{ exercise.id }}_set{{ set_num }}"
+                                   placeholder="{{ exercise.reps }}"
+                                   min="0">
+                        </td>
+                        <td>
+                            <select name="sub_{{ exercise.id }}_set{{ set_num }}">
+                                <option value="0">— Main exercise —</option>
+                                {% for sub in exercise.substitutions %}
+                                    <option value="{{ sub.id }}">{{ sub.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    {% endfor %}
+
+    <!-- Submit -->
+    <div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
+        <button type="submit" class="btn btn-success" style="font-size: 16px; padding: 14px 32px;">
+            Save Session
+        </button>
+        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+
+</form>
+{% endblock %}
