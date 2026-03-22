@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}History — Gym Tracker{% endblock %}
+
+{% block content %}
+<h1>Session History</h1>
+
+<!-- Day selector -->
+<div style="display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap;">
+    {% for day in days %}
+    <a href="{{ url_for('main.history', day_id=day.id) }}"
+       class="btn {% if selected_day and selected_day.id == day.id %}btn-primary{% else %}btn-secondary{% endif %}">
+        {{ day.name }} — {{ day.label }}
+    </a>
+    {% endfor %}
+</div>
+
+{% if not selected_day %}
+    <div style="color: #555; font-size: 15px;">Select a day above to view your history.</div>
+
+{% elif not sessions %}
+    <div style="color: #555; font-size: 15px;">No sessions logged yet for {{ selected_day.label }}.</div>
+
+{% else %}
+
+    <!-- Charts -->
+    <div class="card">
+        <h2>Progress Charts</h2>
+        <div style="margin-bottom: 16px;">
+            <label style="font-size: 12px; color: #888; display: block; margin-bottom: 6px;">
+                SELECT EXERCISE
+            </label>
+            <select id="exercise-select"
+                    onchange="showChart(this.value)"
+                    style="max-width: 300px;">
+                {% for exercise in exercises %}
+                    <option value="{{ exercise.name }}">{{ exercise.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <canvas id="progressChart" height="100"></canvas>
+    </div>
+
+    <!-- Session list -->
+    {% for session in sessions %}
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h2 style="margin: 0;">{{ session.date.strftime('%A, %d %B %Y') }}</h2>
+            <span style="font-size: 12px; color: #555;">Session #{{ session.id }}</span>
+        </div>
+
+        {% if session.notes %}
+        <div style="background: #111; border-left: 3px solid #4f8ef7; padding: 10px 14px;
+                    border-radius: 0 6px 6px 0; margin-bottom: 16px; font-size: 14px; color: #888;">
+            {{ session.notes }}
+        </div>
+        {% endif %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Exercise</th>
+                    <th>Set</th>
+                    <th>Weight</th>
+                    <th>Reps</th>
+                    <th>Substitution</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in session.set_logs | sort(attribute='exercise_id') %}
+                <tr>
+                    <td>
+                        {% if log.sub_id %}
+                            <span style="color: #555; text-decoration: line-through; font-size: 12px;">
+                                {{ log.exercise.name }}
+                            </span>
+                        {% else %}
+                            {{ log.exercise.name }}
+                        {% endif %}
+                    </td>
+                    <td style="color: #555;">{{ log.set_number }}</td>
+                    <td><strong style="color: #fff;">{{ log.weight }}kg</strong></td>
+                    <td>{{ log.reps_completed }}</td>
+                    <td style="color: #4f8ef7; font-size: 13px;">
+                        {% if log.sub_id %}
+                            {{ log.substitution.name }}
+                        {% else %}
+                            <span style="color: #333;">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+
+{% endif %}
+
+{% if selected_day and sessions %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+    const chartData = {{ chart_data | tojson }};
+    let currentChart = null;
+
+    function showChart(exerciseName) {
+        const data = chartData[exerciseName];
+        if (!data || data.dates.length === 0) return;
+
+        if (currentChart) currentChart.destroy();
+
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        currentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.dates,
+                datasets: [{
+                    label: exerciseName,
+                    data: data.weights,
+                    borderColor: '#4f8ef7',
+                    backgroundColor: 'rgba(79, 142, 247, 0.1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#4f8ef7',
+                    pointRadius: 4,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `${ctx.parsed.y}kg`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#666' },
+                        grid: { color: '#1f1f1f' }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#666',
+                            callback: val => `${val}kg`
+                        },
+                        grid: { color: '#1f1f1f' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Show first exercise chart on load
+    const firstExercise = document.getElementById('exercise-select').value;
+    if (firstExercise) showChart(firstExercise);
+</script>
+{% endif %}
+
+{% endblock %}
