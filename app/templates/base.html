@@ -142,6 +142,8 @@
 
         input[type="number"],
         input[type="date"],
+        input[type="text"],
+        input[type="password"],
         select,
         textarea {
             background: #111;
@@ -186,6 +188,10 @@
     <nav>
         <a href="{{ url_for('main.index') }}">🏋️ Gym Tracker</a>
         <a href="{{ url_for('main.history_home') }}">History</a>
+        {% if current_user.is_authenticated %}
+        <span style="margin-left: auto; color: #888; font-size: 14px;">{{ current_user.username }}</span>
+        <a href="{{ url_for('auth.logout') }}">Log out</a>
+        {% endif %}
     </nav>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
