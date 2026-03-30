@@ -1,6 +1,5 @@
 import pytest
 from app import create_app, db as _db
-from app.models import User
 
 TEST_CONFIG = {
     'TESTING': True,
@@ -33,6 +32,7 @@ def db(app):
 
 @pytest.fixture
 def admin_user(db):
+    from app.models import User
     user = User(username='admin', is_admin=True)
     user.set_password('adminpass123')
     db.session.add(user)
@@ -42,6 +42,7 @@ def admin_user(db):
 
 @pytest.fixture
 def regular_user(db):
+    from app.models import User
     user = User(username='alice', is_admin=False)
     user.set_password('alicepass123')
     db.session.add(user)
