@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
+from urllib.parse import urlparse
 from flask_login import login_user, logout_user, login_required
 from app import db
 from app.models import User
@@ -34,6 +35,10 @@ def login():
             return render_template('auth/login.html')
         login_user(user)
         next_page = request.args.get('next')
+        if next_page:
+            parsed = urlparse(next_page)
+            if parsed.scheme or parsed.netloc:
+                next_page = None
         return redirect(next_page or url_for('main.index'))
     return render_template('auth/login.html')
 
