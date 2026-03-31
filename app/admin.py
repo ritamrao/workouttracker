@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from app import db
 from app.models import User
@@ -27,7 +27,7 @@ def users():
 @admin.route('/users/<int:user_id>/delete', methods=['POST'])
 @admin_required
 def delete_user(user_id):
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id) or abort(404)
     if user.id == current_user.id:
         flash('You cannot delete your own account.', 'error')
         return redirect(url_for('admin.users'))
@@ -41,9 +41,13 @@ def delete_user(user_id):
 @admin.route('/users/<int:user_id>/reset-password', methods=['GET', 'POST'])
 @admin_required
 def reset_password(user_id):
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id) or abort(404)
     if request.method == 'POST':
-        user.set_password(request.form['password'])
+        password = request.form.get('password', '')
+        if len(password) < 8:
+            flash('Password must be at least 8 characters.', 'error')
+            return render_template('admin/reset_password.html', user=user)
+        user.set_password(password)
         db.session.commit()
         flash(f'Password reset for {user.username}.', 'success')
         return redirect(url_for('admin.users'))

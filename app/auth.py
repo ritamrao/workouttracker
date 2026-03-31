@@ -12,6 +12,12 @@ def register():
     if request.method == 'POST':
         username = request.form['username'].strip()
         password = request.form['password']
+        if not username:
+            flash('Username cannot be blank.', 'error')
+            return render_template('auth/register.html')
+        if len(password) < 8:
+            flash('Password must be at least 8 characters.', 'error')
+            return render_template('auth/register.html')
         if User.query.filter_by(username=username).first():
             flash('Username already taken.', 'error')
             return render_template('auth/register.html')

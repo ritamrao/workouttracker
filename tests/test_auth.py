@@ -108,3 +108,13 @@ def test_index_accessible_when_logged_in(client, regular_user):
     login(client, 'alice', 'alicepass123')
     response = client.get('/')
     assert response.status_code == 200
+
+
+def test_login_rejects_external_redirect(client, regular_user):
+    response = client.post(
+        '/auth/login?next=http://evil.com',
+        data={'username': 'alice', 'password': 'alicepass123'},
+        follow_redirects=False
+    )
+    assert response.status_code == 302
+    assert 'evil.com' not in response.headers['Location']

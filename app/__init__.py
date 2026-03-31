@@ -17,6 +17,7 @@ def create_app(test_config=None):
 
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
+    login_manager.login_message_category = 'error'
 
     from app.routes import main
     from app.auth import auth
@@ -32,4 +33,4 @@ def create_app(test_config=None):
 @login_manager.user_loader
 def load_user(user_id):
     from app.models import User
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
