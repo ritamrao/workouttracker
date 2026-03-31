@@ -82,3 +82,29 @@ def test_logout_redirects_to_login(client, regular_user):
     login(client, 'alice', 'alicepass123')
     response = client.get('/auth/logout', follow_redirects=True)
     assert b'Log In' in response.data
+
+
+# ── Route protection ──────────────────────────────────────────────────────────
+
+def test_index_requires_login(client):
+    response = client.get('/', follow_redirects=False)
+    assert response.status_code == 302
+    assert '/auth/login' in response.headers['Location']
+
+
+def test_log_requires_login(client):
+    response = client.get('/log/1', follow_redirects=False)
+    assert response.status_code == 302
+    assert '/auth/login' in response.headers['Location']
+
+
+def test_history_requires_login(client):
+    response = client.get('/history', follow_redirects=False)
+    assert response.status_code == 302
+    assert '/auth/login' in response.headers['Location']
+
+
+def test_index_accessible_when_logged_in(client, regular_user):
+    login(client, 'alice', 'alicepass123')
+    response = client.get('/')
+    assert response.status_code == 200
