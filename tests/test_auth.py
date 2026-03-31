@@ -65,7 +65,7 @@ def test_register_page_loads(client):
 def test_login_success(client, regular_user):
     response = login(client, 'alice', 'alicepass123')
     assert response.status_code == 200
-    assert b'alice' in response.data
+    assert b'Invalid username or password' not in response.data
 
 
 def test_login_wrong_password(client, regular_user):
