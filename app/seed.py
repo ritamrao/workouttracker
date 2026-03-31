@@ -1,8 +1,18 @@
 from app import db
-from app.models import WorkoutDay, Exercise, Substitution
+from app.models import WorkoutDay, Exercise, Substitution, User
+from flask import current_app
+
 
 def seed_data():
-    # Don't seed if data already exists
+    # Seed admin user if no users exist
+    if not User.query.first():
+        admin = User(username='admin', is_admin=True)
+        admin.set_password(current_app.config['ADMIN_PASSWORD'])
+        db.session.add(admin)
+        db.session.commit()
+        print("Admin user created.")
+
+    # Don't seed workout data if it already exists
     if WorkoutDay.query.first():
         return
 
